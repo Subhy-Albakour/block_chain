@@ -1,4 +1,5 @@
 import json
+import os
 
 from block_header import BlockHeader
 from transaction import Transaction
@@ -39,6 +40,34 @@ def read_block(block):
 
     return block_obj
 
+
+def read_block_file(file_path):
+    block_file= open(file_path)
+    block_dict=json.load(block_file)
+    block=read_block(block_dict)
+    return block
+
+def read_blocks_directory(directory):
+    blocks=[]
+    filenames=sorted(os.listdir(directory))
+    for filename in filenames :
+        file_path=directory+"/" +filename
+        block=read_block_file(file_path)
+        blocks.append(block)
+    return blocks
+
+def read_chains_directory(directory):
+    chains=[]
+    filenames=sorted(os.listdir(directory))
+    for filename in filenames:
+        #filenames.append(filename)
+        with open(directory+"/" +filename) as f:
+
+            chain_json=json.load(f)
+            chain=read_chain(chain_json)
+            chains.append(chain)
+
+    return (chains, filenames)
     
 
 def read_block_json(block_json):
@@ -53,4 +82,7 @@ def read_chain(chain):
     # read the chain from a json str
     # Returns a list of Block
     # This method does not do any checking
-    pass
+    res=[read_block(block_dict) for block_dict in chain]
+    return res
+
+    

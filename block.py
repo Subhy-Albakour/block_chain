@@ -4,12 +4,16 @@ import hashlib
 
 class Block(object):
 
-    def __init__(self, header, transactions):
+    def __init__(self, header, transactions,zeros=4):
 
         # header is a BlockHeader and transaction is a list of Transaction
         self.header=header
         self.transactions=transactions
-        self.N_STARTING_ZEROS = 4
+        self.N_STARTING_ZEROS = zeros
+        self.invalid_transactions=[]
+
+    def set_zeros(self,n):
+        self.N_STARTING_ZEROS=n  
         
 
     def to_dict(self):
@@ -34,48 +38,20 @@ class Block(object):
         # Check whether the block is proven
         # For that, make sure the hash begins by N_STARTING_ZEROS
         s=self.header.get_hash()
-        binary=bin(int(s,16))[2:] #take the binary representation and exclude the first 2 elements (0b) at the beginning of the code 
-        prefix=binary[:self.N_STARTING_ZEROS]
-
         zeros="".join(['0' for i in range(self.N_STARTING_ZEROS)])
-        print("---------------------------------------------")
-        print (len(binary))
-        print(prefix)
-        print(binary)
-        print(zeros)
+        prefix=s[:self.N_STARTING_ZEROS]
         return prefix==zeros
 
 
     def make_proof_ready(self):
-        print("--------------------------------++++++++++++++++++++++++++++++")
+
 
         nonce=0
-        count=0
-        limit=100
-        while count<limit:
+        while True:
             self.header.set_nonce(nonce)
             if self.is_proof_ready():
                 return 
             nonce=nonce+1
-            count=count+1
         return
+    
 
-
-import block_header
-import block_reader
-import blockchain
-
-import json
-
-import imp
-imp.reload(block_reader)
-
-imp.reload(block)
-
-
-with open('blocks_to_prove/block0.json') as f:
-    data = json.load(f)
-   
-
-block_obj=block_reader.read_block(data)
-block_obj.make_proof_ready()
